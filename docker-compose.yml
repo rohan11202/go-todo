@@ -1,0 +1,38 @@
+version: '3.3'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: go-test-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: p4nda         
+      POSTGRES_PASSWORD: p4nda_pswd  
+      POSTGRES_DB: go-todo          
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - go-network  # Specify the network
+
+  api:
+    build: .
+    container_name: rs11202/go-todo
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres             
+      DB_USER: p4nda                
+      DB_PASS: p4nda_pswd           
+      DB_NAME: go-todo             
+      DB_PORT: 5432                 
+    networks:
+      - go-network  # Specify the same network
+
+volumes:
+  postgres_data:
+
+networks:
+  go-network:  # Define the custom network

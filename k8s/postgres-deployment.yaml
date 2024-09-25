@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-test-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-test-db
+  template:
+    metadata:
+      labels:
+        app: go-test-db
+    spec:
+      containers:
+      - name: go-test-db
+        image: postgres:latest
+        env:
+        - name: POSTGRES_USER
+          value: "p4nda"
+        - name: POSTGRES_PASSWORD
+          value: "p4nda_pswd"
+        - name: POSTGRES_DB
+          value: "go-todo"
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi" # Minimum memory request
+            cpu: "250m" # Minimum CPU request
+          limits:
+            memory: "512Mi" # Maximum memory limit
+            cpu: "500m" # Maximum CPU limit
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-test-db
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: go-test-db
